@@ -22,6 +22,6 @@ resource "aws_instance" "vm" {
 # la obtenga de forma dinámica y profesional.
 output "public_ip" {
   description = "Dirección IP pública de la VM para el despliegue de Docker"
-  value       = "18.212.243.94"
+  value       = "54.83.80.60"
 }
 
