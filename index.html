@@ -1,10 +1,284 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Deploy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline DevOps - Jenkins + Docker + AWS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .badge {
+            background: #1d9e75;
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        h1 span { color: #ff9900; }
+
+        .subtitle {
+            font-size: 16px;
+            color: #8b949e;
+            margin-bottom: 8px;
+        }
+
+        .ip {
+            font-size: 13px;
+            color: #3fb950;
+            font-family: monospace;
+            background: #161b22;
+            padding: 4px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            max-width: 860px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 6px;
+        }
+
+        .card-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .pipeline {
+            max-width: 860px;
+            width: 100%;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .pipeline-title {
+            font-size: 14px;
+            color: #8b949e;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stages {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .stage {
+            background: #0d1117;
+            border: 1px solid #238636;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #3fb950;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stage-dot {
+            width: 8px;
+            height: 8px;
+            background: #3fb950;
+            border-radius: 50%;
+        }
+
+        .arrow {
+            color: #30363d;
+            font-size: 18px;
+        }
+
+        .status-bar {
+            max-width: 860px;
+            width: 100%;
+            background: #161b22;
+            border: 1px solid #238636;
+            border-radius: 10px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #3fb950;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .status-text {
+            font-size: 14px;
+            color: #3fb950;
+            font-weight: 600;
+        }
+
+        .status-right {
+            font-size: 12px;
+            color: #8b949e;
+            font-family: monospace;
+        }
+
+        .tech {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tech-badge {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 12px;
+            color: #8b949e;
+        }
+    </style>
 </head>
 <body>
-    <h1>Deploy automático desde Jenkins 🚀</h1>
+
+    <div class="header">
+        <div class="badge">DEPLOY EXITOSO</div>
+        <h1>Pipeline <span>DevOps</span></h1>
+        <p class="subtitle">Jenkins + Docker + AWS EC2 — Automatizado al 100%</p>
+        <span class="ip">http://54.83.80.60 — Running</span>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">🔧</div>
+            <div class="card-title">Orquestador</div>
+            <div class="card-value">Jenkins</div>
+        </div>
+        <div class="card">
+            <div class="card-icon">🐳</div>
+            <div class="card-title">Contenedor</div>
+            <div class="card-value">Docker</div>
+        </div>
+        <div class="card">
+            <div class="card-icon">☁️</div>
+            <div class="card-title">Nube</div>
+            <div class="card-value">AWS EC2</div>
+        </div>
+        <div class="card">
+            <div class="card-icon">↩️</div>
+            <div class="card-title">Rollback</div>
+            <div class="card-value">Activo</div>
+        </div>
+    </div>
+
+    <div class="pipeline">
+        <div class="pipeline-title">Pipeline stages — Build #1</div>
+        <div class="stages">
+            <div class="stage">
+                <div class="stage-dot"></div>
+                Gestion de Codigo
+            </div>
+            <div class="arrow">›</div>
+            <div class="stage">
+                <div class="stage-dot"></div>
+                Validacion IaC
+            </div>
+            <div class="arrow">›</div>
+            <div class="stage">
+                <div class="stage-dot"></div>
+                Deploy Docker
+            </div>
+            <div class="arrow">›</div>
+            <div class="stage">
+                <div class="stage-dot"></div>
+                Health Check
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-left">
+            <div class="status-dot"></div>
+            <span class="status-text">Servicio activo y funcionando</span>
+        </div>
+        <span class="status-right">AWS us-east-1 — t2.micro — Nginx:alpine</span>
+    </div>
+
+    <div class="tech">
+        <span class="tech-badge">Jenkins LTS</span>
+        <span class="tech-badge">Docker</span>
+        <span class="tech-badge">AWS EC2</span>
+        <span class="tech-badge">Terraform</span>
+        <span class="tech-badge">Nginx</span>
+        <span class="tech-badge">SSH</span>
+        <span class="tech-badge">GitHub</span>
+    </div>
+
 </body>
 </html>
