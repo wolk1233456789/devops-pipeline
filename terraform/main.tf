@@ -12,4 +12,7 @@ resource "aws_instance" "vm" {
     Name = "Jenkins-VM"
   }
 }
+output "public_ip" {
+  value = aws_instance.vm.public_ip
+}
 
