@@ -64,26 +64,28 @@ pipeline {
                 echo "Verificando aplicación en http://${env.TARGET_IP}"
                 sleep 10
                 sshagent(["${env.SSH_CRED_ID}"]) {
-                    sh '''
-                        for i in 1 2 3 4 5; do
-                            STATUS=$(ssh -o StrictHostKeyChecking=no \
+                    sh """
+                        for i in 1 2 3 4 5
+                        do
+                            STATUS=\$(ssh -o StrictHostKeyChecking=no \
                                 -o ConnectTimeout=30 \
-                                ec2-user@54.83.80.60 \
-                                "curl -s -o /dev/null -w '%{http_code}' http://localhost:9999")
-                            if [ "$STATUS" = "200" ]; then
-                                echo "Aplicacion OK - HTTP 200"
+                                ec2-user@${env.TARGET_IP} \
+                                "curl -s -o /dev/null -w '%{http_code}' http://localhost:80")
+                            if [ "\$STATUS" = "200" ]; then
+                                echo "Aplicación OK - HTTP 200"
                                 exit 0
                             else
-                                echo "Intento $i fallido - HTTP $STATUS"
+                                echo "Esperando... intento \$i - HTTP \$STATUS"
                                 sleep 5
                             fi
                         done
-                        echo "Health Check fallido - activando rollback"
+                        echo "Health Check fallido"
                         exit 1
-                    '''
+                    """
                 }
             }
         }
+    }
     post {
         success {
             echo "============================================"
