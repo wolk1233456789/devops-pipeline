@@ -13,8 +13,3 @@ resource "aws_instance" "vm" {
   }
 }
 
-# ESTA ES LA PARTE QUE FALTA Y ES CRÍTICA
-output "public_ip" {
-  description = "IP pública de la instancia creada"
-  value       = aws_instance.vm.public_ip
-}
