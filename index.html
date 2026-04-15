@@ -3,281 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pipeline DevOps - Jenkins + Docker + AWS</title>
+    <title>DevOps Dashboard - Enterprise View</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #030712;
+            --card-bg: rgba(17, 25, 40, 0.75);
+            --border-color: rgba(255, 255, 255, 0.125);
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
         }
 
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            backdrop-filter: blur(16px) saturate(180%);
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- Header --- */
         .header {
             text-align: center;
             margin-bottom: 40px;
         }
 
-        .badge {
-            background: #1d9e75;
-            color: white;
-            padding: 6px 18px;
-            border-radius: 20px;
-            font-size: 13px;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-            display: inline-block;
-        }
-
-        h1 {
-            font-size: 42px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #ffffff;
-        }
-
-        h1 span { color: #ff9900; }
-
-        .subtitle {
-            font-size: 16px;
-            color: #8b949e;
-            margin-bottom: 8px;
-        }
-
-        .ip {
-            font-size: 13px;
-            color: #3fb950;
-            font-family: monospace;
-            background: #161b22;
-            padding: 4px 12px;
-            border-radius: 6px;
-            display: inline-block;
-            margin-top: 8px;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            max-width: 860px;
-            width: 100%;
-            margin-bottom: 40px;
-        }
-
-        .card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .card-icon {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .card-title {
-            font-size: 13px;
-            color: #8b949e;
-            margin-bottom: 6px;
-        }
-
-        .card-value {
-            font-size: 18px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        .pipeline {
-            max-width: 860px;
-            width: 100%;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 10px;
-            padding: 24px;
-            margin-bottom: 30px;
-        }
-
-        .pipeline-title {
-            font-size: 14px;
-            color: #8b949e;
-            margin-bottom: 16px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stages {
-            display: flex;
+        .status-pill {
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            flex-wrap: wrap;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
         }
 
-        .stage {
-            background: #0d1117;
-            border: 1px solid #238636;
-            border-radius: 8px;
-            padding: 10px 16px;
-            font-size: 13px;
-            color: #3fb950;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .stage-dot {
+        .status-pill .dot {
             width: 8px;
             height: 8px;
-            background: #3fb950;
+            background: var(--accent-green);
             border-radius: 50%;
-        }
-
-        .arrow {
-            color: #30363d;
-            font-size: 18px;
-        }
-
-        .status-bar {
-            max-width: 860px;
-            width: 100%;
-            background: #161b22;
-            border: 1px solid #238636;
-            border-radius: 10px;
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .status-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #3fb950;
-            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
             animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+        h1 {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #9ca3af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .status-text {
+        h1 span {
+            background: linear-gradient(to right, var(--accent-blue), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .url-box {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: var(--accent-blue);
             font-size: 14px;
-            color: #3fb950;
-            font-weight: 600;
+            border: 1px solid var(--border-color);
         }
 
-        .status-right {
-            font-size: 12px;
-            color: #8b949e;
-            font-family: monospace;
+        /* --- Grid Cards --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
         }
 
-        .tech {
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--accent-blue);
+        }
+
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 10px;
             display: flex;
-            gap: 10px;
-            margin-top: 24px;
-            flex-wrap: wrap;
+            align-items: center;
             justify-content: center;
+            font-size: 20px;
+            margin-bottom: 15px;
         }
 
-        .tech-badge {
-            background: #21262d;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 4px 12px;
+        .stat-label { color: var(--text-muted); font-size: 13px; margin-bottom: 4px; }
+        .stat-value { font-weight: 700; font-size: 18px; }
+
+        /* --- Pipeline --- */
+        .pipeline-container {
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .pipeline-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
             font-size: 12px;
-            color: #8b949e;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-color);
+            border: 2px solid var(--accent-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-green);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .step-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 16px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: rgba(16, 185, 129, 0.3);
+            z-index: 1;
+        }
+
+        /* --- Tags --- */
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .tag {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            transition: 0.2s;
+        }
+
+        .tag:hover {
+            color: var(--text-main);
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(0.95); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .steps { flex-direction: column; gap: 20px; align-items: flex-start; }
+            .progress-line { display: none; }
+            .step { flex-direction: row; }
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="badge">DEPLOY EXITOSO</div>
-        <h1>Pipeline <span>DevOps</span></h1>
-        <p class="subtitle">Jenkins + Docker + AWS EC2 — Automatizado al 100%</p>
-        <span class="ip">http://54.83.80.60 — Running</span>
-    </div>
+    <div class="container">
+        <div class="header">
+            <div class="status-pill">
+                <div class="dot"></div>
+                Sistema Operativo
+            </div>
+            <h1>Pipeline <span>DevOps</span></h1>
+            <p style="color: var(--text-muted); margin-bottom: 15px;">Automatización de despliegue continuo en AWS</p>
+            <code class="url-box">http://54.83.80.60</code>
+        </div>
 
-    <div class="cards">
-        <div class="card">
-            <div class="card-icon">🔧</div>
-            <div class="card-title">Orquestador</div>
-            <div class="card-value">Jenkins</div>
-        </div>
-        <div class="card">
-            <div class="card-icon">🐳</div>
-            <div class="card-title">Contenedor</div>
-            <div class="card-value">Docker</div>
-        </div>
-        <div class="card">
-            <div class="card-icon">☁️</div>
-            <div class="card-title">Nube</div>
-            <div class="card-value">AWS EC2</div>
-        </div>
-        <div class="card">
-            <div class="card-icon">↩️</div>
-            <div class="card-title">Rollback</div>
-            <div class="card-value">Activo</div>
-        </div>
-    </div>
-
-    <div class="pipeline">
-        <div class="pipeline-title">Pipeline stages — Build #1</div>
-        <div class="stages">
-            <div class="stage">
-                <div class="stage-dot"></div>
-                Gestion de Codigo
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon-circle" style="color: #d24939;">🔧</div>
+                <div class="stat-label">Orquestador</div>
+                <div class="stat-value">Jenkins CI</div>
             </div>
-            <div class="arrow">›</div>
-            <div class="stage">
-                <div class="stage-dot"></div>
-                Validacion IaC
+            <div class="stat-card">
+                <div class="icon-circle" style="color: #2496ed;">🐳</div>
+                <div class="stat-label">Runtime</div>
+                <div class="stat-value">Docker Hub</div>
             </div>
-            <div class="arrow">›</div>
-            <div class="stage">
-                <div class="stage-dot"></div>
-                Deploy Docker
+            <div class="stat-card">
+                <div class="icon-circle" style="color: #ff9900;">☁️</div>
+                <div class="stat-label">Infraestructura</div>
+                <div class="stat-value">AWS EC2</div>
             </div>
-            <div class="arrow">›</div>
-            <div class="stage">
-                <div class="stage-dot"></div>
-                Health Check
+            <div class="stat-card">
+                <div class="icon-circle" style="color: #10b981;">🛡️</div>
+                <div class="stat-label">Estado</div>
+                <div class="stat-value">Saludable</div>
             </div>
         </div>
-    </div>
 
-    <div class="status-bar">
-        <div class="status-left">
-            <div class="status-dot"></div>
-            <span class="status-text">Servicio activo y funcionando</span>
+        <div class="pipeline-container">
+            <div class="pipeline-header">
+                <span>Flujo de Ejecución</span>
+                <span style="color: var(--accent-green)">Build #124 — Passed</span>
+            </div>
+            <div class="steps">
+                <div class="progress-line"></div>
+                <div class="step">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Source</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">IaC Plan</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Build Image</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Deploy</div>
+                </div>
+            </div>
         </div>
-        <span class="status-right">AWS us-east-1 — t2.micro — Nginx:alpine</span>
-    </div>
 
-    <div class="tech">
-        <span class="tech-badge">Jenkins LTS</span>
-        <span class="tech-badge">Docker</span>
-        <span class="tech-badge">AWS EC2</span>
-        <span class="tech-badge">Terraform</span>
-        <span class="tech-badge">Nginx</span>
-        <span class="tech-badge">SSH</span>
-        <span class="tech-badge">GitHub</span>
+        <div class="tech-stack">
+            <span class="tag">Terraform</span>
+            <span class="tag">Docker Compose</span>
+            <span class="tag">Nginx Alpine</span>
+            <span class="tag">GitHub Actions</span>
+            <span class="tag">Ubuntu 22.04</span>
+            <span class="tag">SSL/TLS</span>
+        </div>
     </div>
 
 </body>
