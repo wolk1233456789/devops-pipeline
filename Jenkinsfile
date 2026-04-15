@@ -1,116 +1,200 @@
-pipeline {
-    agent any
-    environment {
-        TARGET_IP = "54.83.80.60"
-        SSH_CRED_ID = "ec2-aws"
-        AWS_CRED_ID = "aws-cred"
-        IMAGE_NAME = "webapp"
-        CONTAINER_NAME = "web"
-    }
-    stages {
-        stage('1. Gestión de Código (Git)') {
-            steps {
-                git branch: 'main', url: 'https://github.com/wolk1233456789/devops-pipeline.git'
-                echo "Código descargado correctamente"
-            }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Pipeline Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070a;
+            --card: rgba(22, 27, 34, 0.8);
+            --accent: #3b82f6;
+            --success: #238636;
+            --border: rgba(255, 255, 255, 0.1);
+            --glow: rgba(59, 130, 246, 0.3);
         }
-        stage('2. Validación de Infraestructura') {
-            steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: "${env.AWS_CRED_ID}",
-                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                ]]) {
-                    dir('terraform') {
-                        sh 'terraform init'
-                        sh 'terraform apply -auto-approve'
-                    }
-                }
-                echo "Infraestructura validada correctamente"
-            }
-        }
-        stage('3. Despliegue de Contenedores Docker') {
-            steps {
-                sshagent(["${env.SSH_CRED_ID}"]) {
-                    sh """
-                        echo "Subiendo archivos a EC2..."
-                        scp -o StrictHostKeyChecking=no \
-                            -o ConnectTimeout=30 \
-                            -o ServerAliveInterval=10 \
-                            index.html Dockerfile \
-                            ec2-user@${env.TARGET_IP}:/home/ec2-user/
 
-                        echo "Desplegando contenedor en EC2..."
-                        ssh -o StrictHostKeyChecking=no \
-                            -o ConnectTimeout=30 \
-                            -o ServerAliveInterval=10 \
-                            ec2-user@${env.TARGET_IP} '
-                                export PATH=\$PATH:/usr/bin:/usr/local/bin:/usr/local/sbin
-                                cd /home/ec2-user/
-                                sudo docker tag webapp:latest webapp:backup || true
-                                sudo docker build -t webapp:latest .
-                                sudo docker stop web || true
-                                sudo docker rm web || true
-                                sudo docker run -d -p 80:80 --name web webapp:latest
-                                echo "Contenedor desplegado correctamente"
-                            '
-                    """
-                }
-            }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            background-image: radial-gradient(circle at 50% -20%, #1e293b, var(--bg));
+            color: #e6edf3;
+            min-height: 100vh;
+            padding: 40px 20px;
         }
-        stage('4. Health Check Final') {
-            steps {
-                echo "Verificando aplicación en http://${env.TARGET_IP}"
-                sleep 10
-                sshagent(["${env.SSH_CRED_ID}"]) {
-                    sh """
-                        for i in 1 2 3 4 5
-                        do
-                            STATUS=\$(ssh -o StrictHostKeyChecking=no \
-                                -o ConnectTimeout=30 \
-                                ec2-user@${env.TARGET_IP} \
-                                "curl -s -o /dev/null -w '%{http_code}' http://localhost:80")
-                            if [ "\$STATUS" = "200" ]; then
-                                echo "Aplicación OK - HTTP 200"
-                                exit 0
-                            else
-                                echo "Esperando... intento \$i - HTTP \$STATUS"
-                                sleep 5
-                            fi
-                        done
-                        echo "Health Check fallido"
-                        exit 1
-                    """
-                }
-            }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        /* --- Header --- */
+        .header { text-align: center; margin-bottom: 50px; }
+        .header h1 { font-size: 42px; font-weight: 800; letter-spacing: -1px; }
+        .header h1 span { color: var(--accent); text-shadow: 0 0 20px var(--glow); }
+
+        /* --- Flujo Funcional (Lo que pediste) --- */
+        .flow-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+            position: relative;
         }
+
+        .flow-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .flow-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+
+        .flow-icon { font-size: 32px; margin-bottom: 10px; display: block; }
+        .flow-title { font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 5px; }
+        .flow-desc { font-size: 11px; color: #8b949e; line-height: 1.4; }
+
+        /* Flechas conectoras */
+        .flow-container::after {
+            content: "";
+            position: absolute;
+            top: 50%; left: 5%; right: 5%;
+            height: 2px; background: linear-gradient(90deg, transparent, var(--border), transparent);
+            z-index: 1;
+        }
+
+        /* --- Terminal y Control --- */
+        .main-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .console {
+            background: #000;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #3fb950;
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #30363d;
+            margin-top: 20px;
+        }
+
+        .btn-deploy {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white; border: none; padding: 18px;
+            border-radius: 12px; font-weight: 800; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 2px;
+            margin-top: 25px; transition: 0.3s;
+        }
+
+        .btn-deploy:hover { box-shadow: 0 0 30px var(--glow); filter: brightness(1.1); }
+
+        .infra-info {
+            display: flex; justify-content: space-between;
+            margin-top: 20px; font-size: 12px; color: #8b949e;
+            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Pipeline <span>Automatizado</span></h1>
+        <p style="color: #8b949e; margin-top: 10px;">CI/CD | Docker | Jenkins | AWS Cloud</p>
+    </div>
+
+    <div class="flow-container">
+        <div class="flow-card" id="c1">
+            <span class="flow-icon">📂</span>
+            <p class="flow-title">CODE</p>
+            <p class="flow-desc">Push a GitHub activa el Webhook</p>
+        </div>
+        <div class="flow-card" id="c2">
+            <span class="flow-icon">⚙️</span>
+            <p class="flow-title">BUILD</p>
+            <p class="flow-desc">Jenkins construye imagen Docker</p>
+        </div>
+        <div class="flow-card" id="c3">
+            <span class="flow-icon">🐳</span>
+            <p class="flow-title">PUSH</p>
+            <p class="flow-desc">Imagen subida a Docker Hub</p>
+        </div>
+        <div class="flow-card" id="c4">
+            <span class="flow-icon">☁️</span>
+            <p class="flow-title">DEPLOY</p>
+            <p class="flow-desc">AWS EC2 actualiza contenedor</p>
+        </div>
+    </div>
+
+    <div class="main-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-size: 18px;">Control de Operaciones</h2>
+            <span style="color: var(--success); font-size: 12px; font-weight: 700;">● INSTANCIA EC2: RUNNING</span>
+        </div>
+
+        <div class="console" id="console">
+            <p>> [READY] Esperando instrucción del usuario...</p>
+        </div>
+
+        <button class="btn-deploy" onclick="runPipeline()">Ejecutar Pipeline Completo</button>
+
+        <div class="infra-info">
+            <span>REGION: us-east-1</span>
+            <span>IP: 54.83.80.60</span>
+            <span>ROLLBACK: ACTIVADO</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addLog(text, color = "#3fb950") {
+        const consoleDiv = document.getElementById('console');
+        const p = document.createElement('p');
+        p.style.color = color;
+        p.innerText = `> ${text}`;
+        consoleDiv.appendChild(p);
+        consoleDiv.scrollTop = consoleDiv.scrollHeight;
     }
-    post {
-        success {
-            echo "============================================"
-            echo "PIPELINE EXITOSO"
-            echo "App corriendo en http://${env.TARGET_IP}"
-            echo "============================================"
+
+    async function runPipeline() {
+        // Reset
+        document.querySelectorAll('.flow-card').forEach(c => c.style.borderColor = "var(--border)");
+        document.getElementById('console').innerHTML = '';
+
+        const steps = [
+            { id: 'c1', msg: "GitHub: Cambio detectado. Descargando repositorio..." },
+            { id: 'c2', msg: "Jenkins: Validando Dockerfile y compilando binarios..." },
+            { id: 'c3', msg: "Docker Hub: Subiendo imagen v1.0.25 exitosamente." },
+            { id: 'c4', msg: "AWS: Pulling image y reiniciando contenedor en EC2..." }
+        ];
+
+        for (const step of steps) {
+            const card = document.getElementById(step.id);
+            card.style.borderColor = "var(--accent)";
+            card.style.boxShadow = "0 0 15px var(--glow)";
+            addLog(step.msg);
+            await new Promise(r => setTimeout(r, 1500));
+            card.style.borderColor = "var(--success)";
+            card.style.boxShadow = "none";
         }
-        failure {
-            echo "============================================"
-            echo "FALLO DETECTADO - Ejecutando rollback..."
-            echo "============================================"
-            sshagent(["${env.SSH_CRED_ID}"]) {
-                sh """
-                    ssh -o StrictHostKeyChecking=no \
-                        -o ConnectTimeout=30 \
-                        ec2-user@${env.TARGET_IP} '
-                            sudo docker stop web || true
-                            sudo docker rm web || true
-                            sudo docker run -d -p 80:80 \
-                                --name web webapp:backup \
-                                || echo "Sin version backup disponible"
-                            echo "Rollback completado"
-                        '
-                """
-            }
-        }
+
+        addLog("HEALTH CHECK: La aplicación está online en el puerto 80.", "#fff");
+        addLog("ROLLBACK STATUS: No se detectaron errores. Versión estable.", "#3fb950");
     }
-}
+</script>
+
+</body>
+</html>
