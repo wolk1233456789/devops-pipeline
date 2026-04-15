@@ -3,267 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise DevOps Dashboard - Jenkins & AWS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <title>DevOps Master Dashboard - Jenkins & AWS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #030712;
-            --card-bg: rgba(17, 25, 40, 0.75);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --accent-orange: #f59e0b;
-            --accent-red: #ef4444;
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
+            --bg: #0b0e14;
+            --card: #161b22;
+            --accent: #3b82f6;
+            --success: #238636;
+            --error: #da3633;
+            --text: #e6edf3;
+            --text-dim: #8b949e;
+            --border: #30363d;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
-            color: var(--text-main);
-            min-height: 100vh;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
-        .container {
-            max-width: 1100px;
+        .dashboard {
+            max-width: 1000px;
             width: 100%;
-            backdrop-filter: blur(16px) saturate(180%);
-            background-color: var(--card-bg);
-            border-radius: 24px;
-            border: 1px solid var(--border-color);
-            padding: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* --- HEADER --- */
-        .header { text-align: center; margin-bottom: 30px; }
-        
-        .status-pill {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2);
-            color: var(--accent-green); padding: 6px 16px; border-radius: 100px;
-            font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px;
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
         }
 
-        .status-pill .dot {
-            width: 8px; height: 8px; background: var(--accent-green);
-            border-radius: 50%; box-shadow: 0 0 10px var(--accent-green);
-            animation: pulse 2s infinite;
+        .badge {
+            background: rgba(35, 134, 54, 0.15);
+            color: #3fb950;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(35, 134, 54, 0.3);
         }
 
-        h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; }
-        h1 span { color: var(--accent-blue); }
-        .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+        h1 { font-size: 24px; font-weight: 800; }
+        h1 span { color: var(--accent); }
 
-        /* --- GRID DE ESTADÍSTICAS --- */
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px; margin-bottom: 30px;
+        /* --- Stats Grid --- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color);
-            padding: 20px; border-radius: 16px; transition: 0.3s;
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
         }
 
-        .stat-card:hover { border-color: var(--accent-blue); transform: translateY(-3px); }
-        .stat-label { color: var(--text-muted); font-size: 12px; margin-bottom: 5px; text-transform: uppercase; }
-        .stat-value { font-weight: 700; font-size: 16px; }
+        .stat-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 18px; font-weight: 700; color: var(--accent); }
 
-        /* --- MÉTRICAS Y PIPELINE --- */
-        .main-content { display: grid; grid-template-columns: 2fr 1.2fr; gap: 25px; margin-bottom: 30px; }
-
-        .pipeline-box {
-            background: rgba(0,0,0,0.2); border-radius: 16px; padding: 25px;
-            border: 1px solid var(--border-color);
+        /* --- Pipeline View --- */
+        .panel {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 25px;
+            margin-bottom: 20px;
         }
 
-        .steps { display: flex; justify-content: space-between; position: relative; margin-top: 30px; }
-        .step { z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 1; }
-        .step-circle {
-            width: 35px; height: 35px; background: var(--bg-color);
-            border: 2px solid var(--accent-green); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent-green); font-weight: bold; font-size: 12px; transition: 0.5s;
-        }
-        .progress-line {
-            position: absolute; top: 17px; left: 10%; right: 10%;
-            height: 2px; background: rgba(16, 185, 129, 0.2); z-index: 1;
+        .pipeline-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-top: 20px;
         }
 
-        /* --- BUILD HISTORY & ROLLBACK --- */
-        .history-box {
-            background: rgba(255, 255, 255, 0.02); border-radius: 16px;
-            padding: 20px; border: 1px solid var(--border-color);
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            flex: 1;
         }
-        .build-item {
-            display: flex; justify-content: space-between; padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px;
-        }
-        .tag { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-        .tag-success { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
-        .tag-fail { background: rgba(239, 68, 68, 0.1); color: var(--accent-red); }
-        .tag-blue { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
 
-        /* --- TERMINAL --- */
+        .circle {
+            width: 40px;
+            height: 40px;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            transition: 0.5s;
+        }
+
+        .active .circle { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .completed .circle { background: var(--success); border-color: var(--success); color: white; }
+
+        .line {
+            position: absolute;
+            top: 20px;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        /* --- Terminal / Logs --- */
         .console {
-            background: #000; border-radius: 12px; border: 1px solid var(--border-color);
-            font-family: 'JetBrains Mono', monospace; overflow: hidden;
+            background: #000;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 15px;
+            font-size: 13px;
+            color: #3fb950;
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
         }
-        .console-header { background: #1a1a1a; padding: 8px 15px; font-size: 11px; color: #666; display: flex; justify-content: space-between; }
-        .console-body { padding: 15px; font-size: 12px; height: 120px; color: #3fb950; line-height: 1.6; overflow: hidden; }
 
-        /* --- BUTTONS --- */
-        .btn-deploy {
-            width: 100%; background: linear-gradient(45deg, var(--accent-blue), #8b5cf6);
-            color: white; border: none; padding: 16px; border-radius: 12px;
-            font-weight: 700; cursor: pointer; margin-top: 20px; transition: 0.3s;
-            text-transform: uppercase; letter-spacing: 1px;
+        /* --- Botón --- */
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: 0.3s;
         }
-        .btn-deploy:hover { filter: brightness(1.2); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3); }
+        .btn:hover { background: #2563eb; transform: translateY(-2px); }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <div class="status-pill"><div class="dot"></div> Sistema Productivo</div>
-        <h1>Pipeline <span>Automatizado</span></h1>
-        <p class="subtitle">Jenkins + Docker + AWS | Aprovisionamiento e Infraestructura como Código</p>
-        <code style="background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 5px; color: var(--accent-blue); font-size: 13px;">Endpoint: http://54.83.80.60 (Elastic IP)</code>
-    </div>
+<div class="dashboard">
+    <header>
+        <div>
+            <h1>Pipeline <span>DevOps</span></h1>
+            <p style="color: var(--text-dim); font-size: 14px;">AWS EC2 Cluster: 54.83.80.60</p>
+        </div>
+        <div class="badge">● SERVICIO ACTIVO</div>
+    </header>
 
-    <div class="stats-grid">
+    <div class="stats">
         <div class="stat-card">
-            <div class="stat-label">Instancia EC2</div>
-            <div class="stat-value">t2.micro (AWS)</div>
+            <p class="stat-label">Cloud Provider</p>
+            <p class="stat-value">AWS (us-east-1)</p>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Virtualización</div>
-            <div class="stat-value">Docker Engine</div>
+            <p class="stat-label">Contenedores</p>
+            <p class="stat-value">Docker Hub v2.4</p>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Orquestador</div>
-            <div class="stat-value">Jenkins LTS</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">IaC tool</div>
-            <div class="stat-value">Terraform</div>
+            <p class="stat-label">Uso de CPU</p>
+            <p class="stat-value" id="cpu-stat">12%</p>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="pipeline-box">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span class="stat-label">Pipeline Visualizer</span>
-                <span id="build-num" style="font-size: 12px; font-weight: bold; color: var(--accent-green);">BUILD #124 PASSED</span>
+    <div class="panel">
+        <h2 style="font-size: 16px; margin-bottom: 20px;">Flujo de Despliegue Automatizado</h2>
+        <div class="pipeline-steps">
+            <div class="line"></div>
+            <div class="step" id="step1">
+                <div class="circle">1</div>
+                <p class="stat-label">GitHub</p>
             </div>
-            <div class="steps">
-                <div class="progress-line"></div>
-                <div class="step"><div class="step-circle" id="s1">✓</div><div class="stat-label">Source</div></div>
-                <div class="step"><div class="step-circle" id="s2">✓</div><div class="stat-label">Terraform</div></div>
-                <div class="step"><div class="step-circle" id="s3">✓</div><div class="stat-label">Build</div></div>
-                <div class="step"><div class="step-circle" id="s4">✓</div><div class="stat-label">Deploy</div></div>
+            <div class="step" id="step2">
+                <div class="circle">2</div>
+                <p class="stat-label">Jenkins</p>
             </div>
-            
-            <div style="margin-top: 40px;">
-                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
-                    <span>EC2 CPU Usage</span><span id="cpu-text">14%</span>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); height: 6px; border-radius: 10px;">
-                    <div id="cpu-bar" style="width: 14%; height: 100%; background: var(--accent-blue); border-radius: 10px; transition: 1s;"></div>
-                </div>
+            <div class="step" id="step3">
+                <div class="circle">3</div>
+                <p class="stat-label">Docker</p>
+            </div>
+            <div class="step" id="step4">
+                <div class="circle">4</div>
+                <p class="stat-label">AWS EC2</p>
             </div>
         </div>
-
-        <div class="history-box">
-            <div class="stat-label" style="margin-bottom: 15px;">Incident & Build History</div>
-            <div class="build-item">
-                <span>Build #124 - Stable</span>
-                <span class="tag tag-success">SUCCESS</span>
-            </div>
-            <div class="build-item">
-                <span>Build #123 - Error 500</span>
-                <span class="tag tag-fail">FAILED</span>
-            </div>
-            <div class="build-item" style="border: none; background: rgba(59, 130, 246, 0.05); padding: 10px;">
-                <span>Auto-Rollback (v1.0.22)</span>
-                <span class="tag tag-blue">RESTORED</span>
-            </div>
-            <div style="margin-top: 15px; font-size: 11px; color: var(--text-muted);">
-                * Control de errores activo: Rollback automático detectado en Build #123 tras fallo de Health Check.
-            </div>
-        </div>
+        
+        <button class="btn" onclick="startBuild()">Disparar Build (CI/CD Trigger)</button>
     </div>
 
-    <div class="console">
-        <div class="console-header">
-            <span>Terminal Output - Jenkins Agent</span>
-            <span>SSH: 54.83.80.60</span>
-        </div>
-        <div class="console-body" id="logs">
-            <p>> [INFO] Waiting for pipeline trigger...</p>
+    <div class="panel">
+        <h2 style="font-size: 14px; color: var(--text-dim); margin-bottom: 10px;">Logs de Consola</h2>
+        <div class="console" id="console">
+            <p>> Sistema listo para recibir cambios...</p>
         </div>
     </div>
-
-    <button class="btn-deploy" onclick="runPipeline()">Ejecutar Nuevo Despliegue (CI/CD Trigger)</button>
 </div>
 
 <script>
-    const logContainer = document.getElementById('logs');
-    const messages = [
-        "[GIT] Webhook received: Commit 7a2b91",
-        "[TERRAFORM] Refreshing state... Instance ready",
-        "[DOCKER] Building image nginx:dev-latest",
-        "[DOCKER] Pushing to Hub... success",
-        "[DEPLOY] Pulling on EC2... container up",
-        "[HEALTH] Status 200 OK. Deploy Finished"
-    ];
-
-    function runPipeline() {
-        const circles = ['s1', 's2', 's3', 's4'];
-        circles.forEach(id => {
-            document.getElementById(id).style.borderColor = 'var(--text-muted)';
-            document.getElementById(id).style.color = 'var(--text-muted)';
-            document.getElementById(id).innerText = '○';
-        });
-
-        let i = 0;
-        const interval = setInterval(() => {
-            if (i < circles.length) {
-                const el = document.getElementById(circles[i]);
-                el.style.borderColor = 'var(--accent-green)';
-                el.style.color = 'var(--accent-green)';
-                el.innerText = '✓';
-                
-                const p = document.createElement('p');
-                p.innerText = "> " + messages[i];
-                logContainer.appendChild(p);
-                if(logContainer.childNodes.length > 6) logContainer.removeChild(logContainer.firstChild);
-                i++;
-            } else {
-                clearInterval(interval);
-            }
-        }, 800);
+    function addLog(text) {
+        const consoleDiv = document.getElementById('console');
+        const p = document.createElement('p');
+        p.innerText = `> ${text}`;
+        consoleDiv.appendChild(p);
+        consoleDiv.scrollTop = consoleDiv.scrollHeight;
     }
 
-    // Simulación de métricas de CPU
+    function startBuild() {
+        // Limpiar estados
+        for(let i=1; i<=4; i++) document.getElementById('step'+i).className = 'step';
+        document.getElementById('console').innerHTML = '';
+
+        addLog("Detectado cambio en GitHub (Main Branch)");
+        document.getElementById('step1').className = 'step completed';
+
+        setTimeout(() => {
+            addLog("Jenkins CI: Iniciando Build #105...");
+            document.getElementById('step2').className = 'step active';
+        }, 1000);
+
+        setTimeout(() => {
+            document.getElementById('step2').className = 'step completed';
+            addLog("Docker: Creando imagen y subiendo a Registry...");
+            document.getElementById('step3').className = 'step active';
+        }, 3000);
+
+        setTimeout(() => {
+            document.getElementById('step3').className = 'step completed';
+            addLog("AWS: Desplegando contenedor en instancia EC2...");
+            document.getElementById('step4').className = 'step active';
+        }, 5000);
+
+        setTimeout(() => {
+            document.getElementById('step4').className = 'step completed';
+            addLog("Health Check: PASSED. Despliegue exitoso.");
+        }, 7000);
+    }
+
+    // Simular CPU
     setInterval(() => {
-        const val = Math.floor(Math.random() * (20 - 8) + 8);
-        document.getElementById('cpu-bar').style.width = val + '%';
-        document.getElementById('cpu-text').innerText = val + '%';
+        const cpu = Math.floor(Math.random() * (25 - 5) + 5);
+        document.getElementById('cpu-stat').innerText = cpu + '%';
     }, 3000);
 </script>
 
