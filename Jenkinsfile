@@ -70,7 +70,7 @@ pipeline {
                             STATUS=\$(ssh -o StrictHostKeyChecking=no \
                                 -o ConnectTimeout=30 \
                                 ec2-user@${env.TARGET_IP} \
-                                "curl -s -o /dev/null -w '%{http_code}' http://localhost:9999")
+                                "curl -s -o /dev/null -w '%{http_code}' http://localhost:80")
                             if [ "\$STATUS" = "200" ]; then
                                 echo "Aplicación OK - HTTP 200"
                                 exit 0
